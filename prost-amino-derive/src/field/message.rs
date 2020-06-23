@@ -95,19 +95,19 @@ impl Field {
         match self.label {
             Label::Optional => quote! {
                 if let Some(ref msg) = #ident {
-                    ::prost::encoding::message::encode(#tag, msg, buf);
+                    _prost::encoding::message::encode(#tag, msg, buf);
                 }
             },
             Label::Required => quote! {
                 let pre = vec![#(#amino_prefix),*];
                 buf.put(pre.as_ref());
-                ::prost::encoding::message::encode(#tag, &#ident, buf);
+                _prost::encoding::message::encode(#tag, &#ident, buf);
             },
             Label::Repeated => quote! {
                 for msg in &#ident {
                     let pre = vec![#(#amino_prefix),*];
                     buf.put(pre.as_ref());
-                    ::prost::encoding::message::encode(#tag, msg, buf);
+                    _prost::encoding::message::encode(#tag, msg, buf);
                 }
             },
         }
