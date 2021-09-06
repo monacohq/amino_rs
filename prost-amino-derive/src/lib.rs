@@ -173,7 +173,6 @@ fn try_message(input: TokenStream) -> Result<TokenStream, Error> {
     let encoded_len = fields
         .iter()
         .map(|&(ref field_ident, ref field)| field.encoded_len(quote!(self.#field_ident)));
-    let encoded_len2 = encoded_len.clone();
 
     let encode = fields
         .iter()
