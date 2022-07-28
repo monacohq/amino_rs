@@ -16,6 +16,7 @@ extern crate anyhow;
 extern crate quote;
 
 use anyhow::{bail, Result};
+use itertools::Itertools;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use sha2::{Digest, Sha256};
