@@ -1,4 +1,4 @@
-use failure::Error;
+use anyhow::Result;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::Meta;
@@ -16,7 +16,7 @@ pub struct Field {
 }
 
 impl Field {
-    pub fn new(attrs: &[Meta], inferred_tag: Option<u32>) -> Result<Option<Field>, Error> {
+    pub fn new(attrs: &[Meta], inferred_tag: Option<u32>) -> Result<Option<Field>> {
         let mut message = false;
         let mut label = None;
         let mut tag = None;
@@ -74,7 +74,7 @@ impl Field {
         }))
     }
 
-    pub fn new_oneof(attrs: &[Meta]) -> Result<Option<Field>, Error> {
+    pub fn new_oneof(attrs: &[Meta]) -> Result<Option<Field>> {
         if let Some(mut field) = Field::new(attrs, None)? {
             if let Some(attr) = attrs.iter().find(|attr| Label::from_attr(attr).is_some()) {
                 bail!(

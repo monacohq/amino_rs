@@ -1,6 +1,7 @@
 #![doc(html_root_url = "https://docs.rs/prost-amino-derive/0.6.1")]
 // The `quote!` macro requires deep recursion.
 #![recursion_limit = "4096"]
+#![feature(iter_intersperse)]
 
 extern crate itertools;
 extern crate proc_macro;
@@ -9,12 +10,12 @@ extern crate sha2;
 extern crate syn;
 
 #[macro_use]
-extern crate failure;
+extern crate anyhow;
+
 #[macro_use]
 extern crate quote;
 
-use failure::Error;
-use itertools::Itertools;
+use anyhow::{bail, Result};
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use sha2::{Digest, Sha256};
@@ -28,7 +29,7 @@ mod field;
 
 use field::Field;
 
-fn try_message(input: TokenStream) -> Result<TokenStream, Error> {
+fn try_message(input: TokenStream) -> Result<TokenStream> {
     let input: DeriveInput = syn::parse(input)?;
 
     let top_level_attrs: Vec<syn::Attribute> = input.attrs;
@@ -144,7 +145,7 @@ fn try_message(input: TokenStream) -> Result<TokenStream, Error> {
                 )),
             }
         })
-        .collect::<Result<Vec<(Ident, Field)>, failure::Context<String>>>()?;
+        .collect::<Result<Vec<(Ident, Field)>>>()?;
 
     // We want Debug to be in declaration order
     let unsorted_fields = fields.clone();
@@ -321,7 +322,7 @@ pub fn message(input: TokenStream) -> TokenStream {
     try_message(input).unwrap()
 }
 
-fn try_enumeration(input: TokenStream) -> Result<TokenStream, Error> {
+fn try_enumeration(input: TokenStream) -> Result<TokenStream> {
     let input: DeriveInput = syn::parse(input)?;
     let ident = input.ident;
 
@@ -424,7 +425,7 @@ pub fn enumeration(input: TokenStream) -> TokenStream {
     try_enumeration(input).unwrap()
 }
 
-fn try_oneof(input: TokenStream) -> Result<TokenStream, Error> {
+fn try_oneof(input: TokenStream) -> Result<TokenStream> {
     let input: DeriveInput = syn::parse(input)?;
 
     let ident = input.ident;
@@ -466,7 +467,7 @@ fn try_oneof(input: TokenStream) -> Result<TokenStream, Error> {
 
     let mut tags = fields
         .iter()
-        .flat_map(|&(ref variant_ident, ref field)| -> Result<u32, Error> {
+        .flat_map(|&(ref variant_ident, ref field)| -> Result<u32> {
             if field.tags().len() > 1 {
                 bail!(
                     "invalid oneof variant {}::{}: oneof variants may only have a single tag",

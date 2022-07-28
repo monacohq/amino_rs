@@ -6,7 +6,7 @@ mod scalar;
 use std::fmt;
 use std::slice;
 
-use failure::Error;
+use anyhow::{bail, Error, Result};
 use proc_macro2::TokenStream;
 use syn::{Attribute, Ident, Lit, LitBool, Meta, MetaList, MetaNameValue, NestedMeta};
 
@@ -29,7 +29,7 @@ impl Field {
     ///
     /// If the meta items are invalid, an error will be returned.
     /// If the field should be ignored, `None` is returned.
-    pub fn new(attrs: Vec<Attribute>, inferred_tag: Option<u32>) -> Result<Option<Field>, Error> {
+    pub fn new(attrs: Vec<Attribute>, inferred_tag: Option<u32>) -> Result<Option<Field>> {
         let attrs = prost_attrs(attrs)?;
 
         // TODO: check for ignore attribute.
@@ -53,7 +53,7 @@ impl Field {
     ///
     /// If the meta items are invalid, an error will be returned.
     /// If the field should be ignored, `None` is returned.
-    pub fn new_oneof(attrs: Vec<Attribute>) -> Result<Option<Field>, Error> {
+    pub fn new_oneof(attrs: Vec<Attribute>) -> Result<Option<Field>> {
         let attrs = prost_attrs(attrs)?;
 
         // TODO: check for ignore attribute.
@@ -213,7 +213,7 @@ impl fmt::Display for Label {
 }
 
 /// Get the items belonging to the 'prost' list attribute, e.g. `#[prost(foo, bar="baz")]`.
-pub(super) fn prost_attrs(attrs: Vec<Attribute>) -> Result<Vec<Meta>, Error> {
+pub(super) fn prost_attrs(attrs: Vec<Attribute>) -> Result<Vec<Meta>> {
     Ok(attrs
         .iter()
         .flat_map(Attribute::parse_meta)
@@ -236,7 +236,7 @@ pub(super) fn prost_attrs(attrs: Vec<Attribute>) -> Result<Vec<Meta>, Error> {
         .collect())
 }
 
-pub fn set_option<T>(option: &mut Option<T>, value: T, message: &str) -> Result<(), Error>
+pub fn set_option<T>(option: &mut Option<T>, value: T, message: &str) -> Result<()>
 where
     T: fmt::Debug,
 {
@@ -247,18 +247,18 @@ where
     Ok(())
 }
 
-pub fn set_bool(b: &mut bool, message: &str) -> Result<(), Error> {
+pub fn set_bool(b: &mut bool, message: &str) -> Result<()> {
     if *b {
         bail!("{}", message);
     } else {
         *b = true;
-        Ok(())
     }
+    Ok(())
 }
 
 /// Unpacks an attribute into a (key, boolean) pair, returning the boolean value.
 /// If the key doesn't match the attribute, `None` is returned.
-fn bool_attr(key: &str, attr: &Meta) -> Result<Option<bool>, Error> {
+fn bool_attr(key: &str, attr: &Meta) -> Result<Option<bool>> {
     if !attr.path().is_ident(key) {
         return Ok(None);
     }
@@ -298,7 +298,7 @@ fn word_attr(key: &str, attr: &Meta) -> bool {
     }
 }
 
-pub(super) fn tag_attr(attr: &Meta) -> Result<Option<u32>, Error> {
+pub(super) fn tag_attr(attr: &Meta) -> Result<Option<u32>> {
     if !attr.path().is_ident("tag") {
         return Ok(None);
     }
@@ -325,7 +325,7 @@ pub(super) fn tag_attr(attr: &Meta) -> Result<Option<u32>, Error> {
     }
 }
 
-fn amino_name_attr(attr: &Meta) -> Result<Option<String>, Error> {
+fn amino_name_attr(attr: &Meta) -> Result<Option<String>> {
     if !attr.path().is_ident("amino_name") {
         return Ok(None);
     }
@@ -338,7 +338,7 @@ fn amino_name_attr(attr: &Meta) -> Result<Option<String>, Error> {
     }
 }
 
-fn tags_attr(attr: &Meta) -> Result<Option<Vec<u32>>, Error> {
+fn tags_attr(attr: &Meta) -> Result<Option<Vec<u32>>> {
     if !attr.path().is_ident("tags") {
         return Ok(None);
     }
