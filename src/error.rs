@@ -99,7 +99,6 @@ impl EncodeError {
 
 impl fmt::Display for EncodeError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(self.to_string().as_ref())?;
         write!(
             f,
             " (required: {}, remaining: {})",

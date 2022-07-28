@@ -66,7 +66,7 @@ where
         buf.advance(1);
         Ok(u64::from(byte))
     } else if len > 10 || bytes[len - 1] < 0x80 {
-        let (value, advance) =  decode_varint_slice(bytes)?;
+        let (value, advance) = decode_varint_slice(bytes)?;
         buf.advance(advance);
         Ok(value)
     } else {
@@ -473,20 +473,20 @@ varint!(i64, int64);
 varint!(u32, uint32);
 varint!(u64, uint64);
 varint!(i32, sint32,
-        to_uint64(value) {
-            ((value << 1) ^ (value >> 31)) as u32 as u64
-        },
-        from_uint64(value) {
-            let value = value as u32;
-            ((value >> 1) as i32) ^ (-((value & 1) as i32))
-        });
+to_uint64(value) {
+    ((value << 1) ^ (value >> 31)) as u32 as u64
+},
+from_uint64(value) {
+    let value = value as u32;
+    ((value >> 1) as i32) ^ (-((value & 1) as i32))
+});
 varint!(i64, sint64,
-        to_uint64(value) {
-            ((value << 1) ^ (value >> 63)) as u64
-        },
-        from_uint64(value) {
-            ((value >> 1) as i64) ^ (-((value & 1) as i64))
-        });
+to_uint64(value) {
+    ((value << 1) ^ (value >> 63)) as u64
+},
+from_uint64(value) {
+    ((value >> 1) as i64) ^ (-((value & 1) as i64))
+});
 
 /// Macro which emits a module containing a set of encoding functions for a
 /// fixed width numeric type.
@@ -1276,10 +1276,12 @@ mod test {
 
             assert_eq!(encoded_len_varint(value), encoded.len());
 
-            let roundtrip_value = decode_varint(&mut encoded.clone()).expect("decoding failed");
+            let roundtrip_value =
+                decode_varint(&mut Bytes::copy_from_slice(encoded)).expect("decoding failed");
             assert_eq!(value, roundtrip_value);
 
-            let roundtrip_value = decode_varint_slow(&mut encoded.clone()).expect("slow decoding failed");
+            let roundtrip_value = decode_varint_slow(&mut Bytes::copy_from_slice(encoded))
+                .expect("slow decoding failed");
             assert_eq!(value, roundtrip_value);
         }
 
@@ -1406,34 +1408,34 @@ mod test {
     }
 
     map_tests!(keys: [
-                   (i32, int32),
-                   (i64, int64),
-                   (u32, uint32),
-                   (u64, uint64),
-                   (i32, sint32),
-                   (i64, sint64),
-                   (u32, fixed32),
-                   (u64, fixed64),
-                   (i32, sfixed32),
-                   (i64, sfixed64),
-                   (bool, bool),
-                   (String, string)
-               ],
-               vals: [
-                   (f32, float),
-                   (f64, double),
-                   (i32, int32),
-                   (i64, int64),
-                   (u32, uint32),
-                   (u64, uint64),
-                   (i32, sint32),
-                   (i64, sint64),
-                   (u32, fixed32),
-                   (u64, fixed64),
-                   (i32, sfixed32),
-                   (i64, sfixed64),
-                   (bool, bool),
-                   (String, string),
-                   (Vec<u8>, bytes)
-               ]);
+        (i32, int32),
+        (i64, int64),
+        (u32, uint32),
+        (u64, uint64),
+        (i32, sint32),
+        (i64, sint64),
+        (u32, fixed32),
+        (u64, fixed64),
+        (i32, sfixed32),
+        (i64, sfixed64),
+        (bool, bool),
+        (String, string)
+    ],
+    vals: [
+        (f32, float),
+        (f64, double),
+        (i32, int32),
+        (i64, int64),
+        (u32, uint32),
+        (u64, uint64),
+        (i32, sint32),
+        (i64, sint64),
+        (u32, fixed32),
+        (u64, fixed64),
+        (i32, sfixed32),
+        (i64, sfixed64),
+        (bool, bool),
+        (String, string),
+        (Vec<u8>, bytes)
+    ]);
 }
