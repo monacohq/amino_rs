@@ -1,4 +1,4 @@
-use failure::Error;
+use anyhow::Result;
 use proc_macro2::TokenStream;
 use syn::{parse_str, Lit, Meta, MetaNameValue, NestedMeta, Path};
 
@@ -11,7 +11,7 @@ pub struct Field {
 }
 
 impl Field {
-    pub fn new(attrs: &[Meta]) -> Result<Option<Field>, Error> {
+    pub fn new(attrs: &[Meta]) -> Result<Option<Field>> {
         let mut ty = None;
         let mut tags = None;
         let mut unknown_attrs = Vec::new();

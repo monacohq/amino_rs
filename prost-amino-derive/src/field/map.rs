@@ -1,4 +1,4 @@
-use failure::Error;
+use anyhow::{bail, Result};
 use proc_macro2::{Span, TokenStream};
 use syn::{Ident, Lit, Meta, MetaNameValue, NestedMeta};
 
@@ -46,7 +46,7 @@ pub struct Field {
 }
 
 impl Field {
-    pub fn new(attrs: &[Meta], inferred_tag: Option<u32>) -> Result<Option<Field>, Error> {
+    pub fn new(attrs: &[Meta], inferred_tag: Option<u32>) -> Result<Option<Field>> {
         let mut types = None;
         let mut tag = None;
 
@@ -109,7 +109,7 @@ impl Field {
         })
     }
 
-    pub fn new_oneof(attrs: &[Meta]) -> Result<Option<Field>, Error> {
+    pub fn new_oneof(attrs: &[Meta]) -> Result<Option<Field>> {
         Field::new(attrs, None)
     }
 
@@ -282,7 +282,7 @@ impl Field {
     }
 }
 
-fn key_ty_from_str(s: &str) -> Result<scalar::Ty, Error> {
+fn key_ty_from_str(s: &str) -> Result<scalar::Ty> {
     let ty = scalar::Ty::from_str(s)?;
     match ty {
         scalar::Ty::Int32
@@ -309,7 +309,7 @@ pub enum ValueTy {
 }
 
 impl ValueTy {
-    fn from_str(s: &str) -> Result<ValueTy, Error> {
+    fn from_str(s: &str) -> Result<ValueTy> {
         if let Ok(ty) = scalar::Ty::from_str(s) {
             Ok(ValueTy::Scalar(ty))
         } else if s.trim() == "message" {

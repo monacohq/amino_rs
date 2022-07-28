@@ -1,6 +1,6 @@
 use std::fmt;
 
-use failure::Error;
+use anyhow::{format_err, Result};
 use proc_macro2::{Span, TokenStream};
 use quote;
 use syn::{
@@ -23,7 +23,7 @@ pub struct Field {
 }
 
 impl Field {
-    pub fn new(attrs: &[Meta], inferred_tag: Option<u32>) -> Result<Option<Field>, Error> {
+    pub fn new(attrs: &[Meta], inferred_tag: Option<u32>) -> Result<Option<Field>> {
         let mut ty = None;
         let mut label = None;
         let mut packed = None;
@@ -109,7 +109,7 @@ impl Field {
         }))
     }
 
-    pub fn new_oneof(attrs: &[Meta]) -> Result<Option<Field>, Error> {
+    pub fn new_oneof(attrs: &[Meta]) -> Result<Option<Field>> {
         if let Some(mut field) = Field::new(attrs, None)? {
             match field.kind {
                 Kind::Plain(default) => {
@@ -404,7 +404,7 @@ pub enum Ty {
 }
 
 impl Ty {
-    pub fn from_attr(attr: &Meta) -> Result<Option<Ty>, Error> {
+    pub fn from_attr(attr: &Meta) -> Result<Option<Ty>> {
         let ty = match *attr {
             Meta::Word(ref name) if name == "float" => Ty::Float,
             Meta::Word(ref name) if name == "double" => Ty::Double,
@@ -447,7 +447,7 @@ impl Ty {
         Ok(Some(ty))
     }
 
-    pub fn from_str(s: &str) -> Result<Ty, Error> {
+    pub fn from_str(s: &str) -> Result<Ty> {
         let enumeration_len = "enumeration".len();
         let error = Err(format_err!("invalid type: {}", s));
         let ty = match s.trim() {
@@ -594,7 +594,7 @@ pub enum DefaultValue {
 }
 
 impl DefaultValue {
-    pub fn from_attr(attr: &Meta) -> Result<Option<Lit>, Error> {
+    pub fn from_attr(attr: &Meta) -> Result<Option<Lit>> {
         if attr.name() != "default" {
             return Ok(None);
         } else if let Meta::NameValue(ref name_value) = *attr {
@@ -604,7 +604,7 @@ impl DefaultValue {
         }
     }
 
-    pub fn from_lit(ty: &Ty, lit: Lit) -> Result<DefaultValue, Error> {
+    pub fn from_lit(ty: &Ty, lit: Lit) -> Result<DefaultValue> {
         let is_i32 = *ty == Ty::Int32 || *ty == Ty::Sint32 || *ty == Ty::Sfixed32;
         let is_i64 = *ty == Ty::Int64 || *ty == Ty::Sint64 || *ty == Ty::Sfixed64;
 
